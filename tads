@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Snazzy Weight Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #43cea2;
+      --secondary: #185a9d;
+      --bg: #f3f8fa;
+      --card: #fff;
+      --accent: #ffb347;
+      --danger: #ff5252;
+      --gradient: linear-gradient(120deg, var(--primary), var(--secondary));
+      --shadow: 0 4px 24px rgba(67, 206, 162, 0.08);
+      --font: 'Montserrat', 'Segoe UI', 'Arial', sans-serif;
+    }
+    body {
+      background: var(--gradient);
+      font-family: var(--font);
+      margin: 0;
+      min-height: 100vh;
+      color: #232323;
+      letter-spacing: 0.01em;
+      transition: background 0.6s;
+    }
+    .container {
+      max-width: 480px;
+      background: var(--card);
+      margin: 2.5rem auto 2rem auto;
+      border-radius: 1.25rem;
+      box-shadow: var(--shadow);
+      padding: 2.2rem 1.5rem 2.5rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1.2s;
+    }
+    @keyframes fadeIn {
+      from {transform: translateY(30px) scale(0.97); opacity: 0;}
+      to   {transform: none; opacity: 1;}
+    }
+    .container:before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -70px;
+      width: 180px;
+      height: 180px;
+      background: var(--gradient);
+      opacity: 0.09;
+      border-radius: 50%;
+      z-index: 0;
+    }
+    h1 {
+      text-align: center;
+      background: var(--gradient);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-size: 2rem;
+      margin: 0 0 1.2rem 0;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      z-index: 2;
+      position: relative;
+    }
+    .settings-card {
+      background: #f7fafc;
+      border-radius: 0.9rem;
+      box-shadow: 0 1px 6px #0001;
+      padding: 1.1rem 1rem 0.7rem 1rem;
+      margin-bottom: 1.1rem;
+      position: relative;
+      z-index: 2;
+    }
+    .settings-row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+    .settings-row label {
+      flex: 1;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #555;
+    }
+    .settings-row input[type="number"],
+    .settings-row input[type="date"] {
+      flex: 1.1;
+      padding: 0.45em 0.8em;
+      border-radius: 0.55em;
+      border: 1px solid #d2e6e9;
+      font-size: 1em;
+      background: #fff;
+      box-sizing: border-box;
+      transition: border 0.18s;
+    }
+    .settings-row input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+    .settings-save-btn {
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      border-radius: 0.5em;
+      font-size: 1em;
+      padding: 0.5em 1.5em;
+      font-weight: 700;
+      margin: 0 auto 0.2rem auto;
+      display: block;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #3c8dbc08;
+      transition: box-shadow 0.18s, background 0.16s;
+    }
+    .settings-save-btn:hover {
+      box-shadow: 0 8px 24px #185a9d18;
+      background: linear-gradient(120deg, #43cea2 80%, #43cea2 100%);
+    }
+    .progress-section {
+      margin: 1.1rem 0 1.3rem 0;
+      text-align: center;
+      z-index: 2;
+      position: relative;
+    }
+    .progress-label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.25em;
+      color: #6b7b8a;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      background: #e6f2f1;
+      border-radius: 1rem;
+      height: 1.25rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px #0001;
+      margin-bottom: 0.3rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--gradient);
+      width: 0;
+      border-radius: 1rem 0 0 1rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: right;
+      padding-right: 0.8em;
+      line-height: 1.25rem;
+      transition: width 0.7s cubic-bezier(.22,2.2,.36,.97);
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .progress-details {
+      font-size: 0.99rem;
+      color: #4a6b7b;
+      margin-top: 0.12rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      margin-left: 0.1rem;
+      margin-right: 0.1rem;
+    }
+    form#weightForm {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 2;
+      position: relative;
+    }
+    #weightInput, #dateInput {
+      flex: 2 1 120px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #d2e6e9;
+      border-radius: 8px;
+    }
+    #weightInput:focus, #dateInput:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+    #weightForm button {
+      flex: 1 0 80px;
+      background: var(--gradient);
+      color: #fff;
+      padding: 0.5rem 0.9rem;
+      border: none;
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s;
+      font-size: 1em;
+      box-shadow: 0 2px 8px #43cea208;
+    }
+    #weightForm button:hover {
+      background: linear-gradient(120deg, #185a9d 80%, #43cea2 100%);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      z-index: 2;
+      position: relative;
+    }
+    th, td {
+      text-align: center;
+      padding: 0.62em 0.2em;
+      border-bottom: 1px solid #e8f1f4;
+      font-size: 1em;
+    }
+    th {
+      color: #268d80;
+      font-weight: 700;
+      background: #f3f8fa;
+    }
+    .delete-btn {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.95em;
+      font-weight: 600;
+      padding: 0.37em 0.85em;
+      cursor: pointer;
+      box-shadow: 0 1px 3px #e5393520;
+      transition: background 0.16s;
+    }
+    .delete-btn:hover {
+      background: #c62828;
+    }
+    .summary {
+      font-size: 1.25rem;
+      margin-bottom: 0.4rem;
+      margin-top: 0.3rem;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      z-index: 2;
+      position: relative;
+      text-shadow: 0 1px 2px #ffb34718;
+    }
+    .startdetails {
+      font-size: 1.04em;
+      color: #4a6b7b;
+      text-align: center;
+      margin-bottom: 0.4em;
+      margin-top: -0.5em;
+      z-index: 2;
+      position: relative;
+    }
+    .fade-in {
+      animation: fadeIn 1.2s;
+    }
+    @media (max-width: 520px) {
+      .container { padding: 1.1rem 0.2rem 1.6rem 0.2rem; }
+      h1 { font-size: 1.13rem; }
+      th, td { font-size: 0.92em; }
+      .summary { font-size: 1.09rem; }
+      .progress-label { font-size: 0.98rem; }
+      .settings-row label { font-size: 0.97rem; }
+      .settings-card { padding: 0.7rem 0.3rem 0.5rem 0.3rem; }
+      .progress-bar-fill { font-size: 0.93rem; padding-right: 0.3em;}
+      .progress-bar-bg { height: 1em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Weight Tracker</h1>
+    <div class="settings-card" id="settingsCard">
+      <form id="settingsForm" autocomplete="off">
+        <div class="settings-row">
+          <label for="startWeight">Start Weight</label>
+          <input type="number" id="startWeight" min="0" step="0.01" required>
+        </div>
+        <div class="settings-row">
+          <label for="goalWeight">Goal Weight</label>
+          <input type="number" id="goalWeight" min="0" step="0.01" required>
+        </div>
+        <div class="settings-row">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" required>
+        </div>
+        <button type="submit" class="settings-save-btn">Save</button>
+      </form>
+    </div>
+    <div class="startdetails" id="startDetails" style="display:none;"></div>
+    <div class="progress-section" id="progressSection" style="display:none;">
+      <div class="progress-label" id="progressLabel">Progress</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBar" style="width: 0%;">0%</div>
+      </div>
+      <div class="progress-details" id="progressDetails"></div>
+    </div>
+    <div class="summary" id="totalLost" style="display:none;">Total Lost: 0</div>
+    <form id="weightForm" autocomplete="off" style="display:none;">
+      <input type="date" id="dateInput" required>
+      <input type="number" id="weightInput" min="0.01" step="0.01" placeholder="Your weight" required>
+      <button type="submit">Add</button>
+    </form>
+    <table id="weightTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Weight</th>
+          <th>Change</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="weightBody">
+        <!-- entries go here -->
+      </tbody>
+    </table>
+  </div>
+  <script>
+    // --- Storage Keys
+    const STORAGE_KEY_SETTINGS = 'snazzyWeightTrackerSettings_v2';
+    const STORAGE_KEY_ENTRIES  = 'snazzyWeightTrackerEntries_v2';
+
+    // --- State
+    let settings = {
+      startWeight: null,
+      goalWeight: null,
+      startDate: null
+    };
+    let entries = [];
+
+    // --- Helpers
+    function saveSettings() {
+      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    }
+    function loadSettings() {
+      const s = localStorage.getItem(STORAGE_KEY_SETTINGS);
+      if (s) settings = JSON.parse(s);
+    }
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+    }
+    function loadEntries() {
+      const e = localStorage.getItem(STORAGE_KEY_ENTRIES);
+      entries = e ? JSON.parse(e) : [];
+    }
+
+    function formatDate(d) {
+      if (!d) return '';
+      const dt = new Date(d);
+      if (isNaN(dt)) return d;
+      return dt.toLocaleDateString(undefined, {year: 'numeric', month: 'short', day: 'numeric'});
+    }
+
+    // --- UI Updates
+    function updateStartDetails() {
+      const sd = document.getElementById('startDetails');
+      if (
+        settings.startWeight &&
+        settings.goalWeight &&
+        settings.startDate
+      ) {
+        sd.style.display = '';
+        sd.innerHTML = `<b>Start:</b> <span title="Start date">${formatDate(settings.startDate)}</span> &bull; <b>Start Weight:</b> ${settings.startWeight} &bull; <b>Goal:</b> ${settings.goalWeight}`;
+      } else {
+        sd.style.display = 'none';
+      }
+    }
+
+    function getTotalLost() {
+      if (!settings.startWeight) return 0;
+      if (entries.length === 0) return 0;
+      // Find earliest entry >= start date (if any), else use start weight
+      let minDate = settings.startDate;
+      let firstEntry = entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).find(e => e.date >= minDate);
+      let lastEntry = entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(-1)[0];
+      if (!firstEntry) return 0;
+      return parseFloat(firstEntry.weight) - parseFloat(lastEntry.weight);
+    }
+
+    function updateProgress() {
+      const progSec = document.getElementById('progressSection');
+      if (
+        !settings.startWeight ||
+        !settings.goalWeight
+      ) {
+        progSec.style.display = 'none';
+        return;
+      }
+      progSec.style.display = '';
+      const start = parseFloat(settings.startWeight);
+      const goal = parseFloat(settings.goalWeight);
+      let lastWeight = entries.length>0
+        ? parseFloat(entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(-1)[0].weight)
+        : start;
+      const toLose = Math.max(start - goal, 0);
+      let totalLost = Math.max(0, start - lastWeight);
+      let percent = toLose === 0 ? 100 : Math.min(100, Math.max(0, (totalLost / toLose) * 100));
+      if (totalLost > toLose) percent = 100;
+      const bar = document.getElementById('progressBar');
+      bar.style.width = `${percent}%`;
+      bar.textContent = `${percent.toFixed(1)}%`;
+      document.getElementById('progressDetails').innerHTML =
+        `<span><b>Lost:</b> ${totalLost.toFixed(2)}</span>
+         <span><b>To Go:</b> ${(Math.max(0, toLose - totalLost)).toFixed(2)}</span>`;
+      document.getElementById('progressLabel').textContent =
+        percent === 100 ? "🎉 Goal Reached!" : "Progress to Goal";
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('weightBody');
+      tbody.innerHTML = '';
+      if (!settings.startWeight) return;
+      // Sort entries by date
+      let sorted = entries.slice().sort((a,b)=>a.date.localeCompare(b.date));
+      let prevWeight = parseFloat(settings.startWeight);
+      sorted.forEach((item, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'fade-in';
+        let change = '';
+        if (i === 0) {
+          change = (item.weight - prevWeight).toFixed(2);
+        } else {
+          change = (item.weight - sorted[i-1].weight).toFixed(2);
+        }
+        let changeText = '';
+        if (change == 0) changeText = '—';
+        else if (change > 0) changeText = `<span style="color:#e53935;">+${change}</span>`;
+        else changeText = `<span style="color:#268d80;">${change}</span>`;
+        tr.innerHTML = `
+          <td>${formatDate(item.date)}</td>
+          <td>${item.weight}</td>
+          <td>${changeText}</td>
+          <td>
+            <button class="delete-btn" onclick="deleteEntry('${item.date}')" title="Delete">&#10005;</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        prevWeight = item.weight;
+      });
+      // Update summary
+      const totalLostDiv = document.getElementById('totalLost');
+      let lastWeight = sorted.length>0 ? sorted[sorted.length-1].weight : settings.startWeight;
+      let lost = Math.max(0, settings.startWeight - lastWeight);
+      totalLostDiv.textContent = 'Total Lost: ' + lost.toFixed(2);
+    }
+
+    function updateVisibility() {
+      // Show/hide main tracker if settings complete
+      const ready =
+        settings.startWeight > 0 &&
+        settings.goalWeight > 0 &&
+        settings.startDate;
+      [
+        'startDetails',
+        'progressSection',
+        'totalLost',
+        'weightForm',
+        'weightTable'
+      ].forEach(id => {
+        document.getElementById(id).style.display = ready ? '' : 'none';
+      });
+      document.getElementById('settingsCard').style.display = ready ? 'none' : '';
+    }
+
+    // --- Entry delete
+    window.deleteEntry = function(dateStr) {
+      if (confirm('Delete this entry?')) {
+        entries = entries.filter(e => e.date !== dateStr);
+        saveEntries();
+        renderTable();
+        updateProgress();
+      }
+    };
+
+    // --- Settings Form
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const sw = parseFloat(document.getElementById('startWeight').value);
+      const gw = parseFloat(document.getElementById('goalWeight').value);
+      const sd = document.getElementById('startDate').value;
+      if (sw > 0 && gw > 0 && sd) {
+        settings.startWeight = sw;
+        settings.goalWeight = gw;
+        settings.startDate = sd;
+        saveSettings();
+        updateStartDetails();
+        updateProgress();
+        updateVisibility();
+      }
+    });
+
+    // --- Add weight log
+    document.getElementById('weightForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const dateInput = document.getElementById('dateInput');
+      const weightInput = document.getElementById('weightInput');
+      const date = dateInput.value;
+      const weight = parseFloat(weightInput.value);
+      if (!date || !weight || weight <= 0) return;
+      // Check for duplicate date
+      if (entries.some(e => e.date === date)) {
+        alert("You already have an entry for this date.");
+        return;
+      }
+      entries.push({ date, weight: weight.toFixed(2) });
+      saveEntries();
+      renderTable();
+      updateProgress();
+      dateInput.value = '';
+      weightInput.value = '';
+      dateInput.focus();
+    });
+
+    // --- Load on page
+    function populateSettingsFields() {
+      if (settings.startWeight) document.getElementById('startWeight').value = settings.startWeight;
+      if (settings.goalWeight) document.getElementById('goalWeight').value = settings.goalWeight;
+      if (settings.startDate) document.getElementById('startDate').value = settings.startDate;
+    }
+    function onLoad() {
+      loadSettings();
+      loadEntries();
+      updateStartDetails();
+      updateProgress();
+      renderTable();
+      populateSettingsFields();
+      updateVisibility();
+    }
+    window.addEventListener('DOMContentLoaded', onLoad);
+  </script>
+</body>
+</html>
