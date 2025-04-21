@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Weight Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Aptos&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Aptos', sans-serif;
+      margin: 0;
+      background-color: #fffafa;
+      color: #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      max-width: 700px;
+      width: 90%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #d48ba0;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      margin: 0;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      color: #a8dadc;
+      border-bottom: 2px solid #a8dadc;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .weight-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .weight-info label {
+      font-weight: 600;
+      width: 140px;
+    }
+
+    .weight-info input,
+    #newGoalWeight,
+    #recordDate,
+    #recordWeight {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+      width: 120px;
+    }
+
+    button {
+      background-color: #d48ba0;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #c06d88;
+    }
+
+    #editGoalForm {
+      margin-top: 10px;
+    }
+
+    .progress-bar-container {
+      background-color: #f2f2f2;
+      border-radius: 10px;
+      height: 25px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .progress-fill {
+      background-color: #a8dadc;
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    li button {
+      background-color: #f76c6c;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    li button:hover {
+      background-color: #d94444;
+    }
+
+    #addWeightEntry {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #uploadSection {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #ccc;
+    }
+
+    #uploadFile {
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 10px;
+    }
+
+    #uploadMessage {
+      font-size: 0.9em;
+      color: #17a2b8;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.85em;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>My Weight Journey</h1>
+    </header>
+    <main>
+      <section id="status">
+        <h2>Current Status</h2>
+        <div class="weight-info">
+          <label>Start Weight:</label>
+          <span id="startWeightDisplay"></span> lbs
+        </div>
+        <div class="weight-info">
+          <label>Current Weight:</label>
+          <input type="number" id="currentWeightInput" />
+          <button id="updateWeightBtn">Update</button>
+        </div>
+        <div class="weight-info">
+          <label>Goal Weight:</label>
+          <span id="goalWeightDisplay"></span> lbs
+          <button id="editGoalBtn">Edit</button>
+        </div>
+        <div id="editGoalForm" style="display:none;">
+          <input type="number" id="newGoalWeight" placeholder="Enter new goal" />
+          <button id="saveGoalBtn">Save</button>
+        </div>
+      </section>
+
+      <section id="progress">
+        <h2>Progress</h2>
+        <div class="progress-bar-container">
+          <div class="progress-fill" id="progressBarFill">0%</div>
+        </div>
+      </section>
+
+      <section id="weightRecordSection">
+        <h2>Weight Record</h2>
+        <div id="addWeightEntry">
+          <input type="date" id="recordDate" />
+          <input type="number" id="recordWeight" placeholder="Weight (lbs)" />
+          <button id="addRecordBtn">Add</button>
+        </div>
+        <ul id="weightRecordList"></ul>
+      </section>
+
+      <section id="uploadSection">
+        <h2>Upload Data</h2>
+        <input type="file" id="uploadFile" accept=".json, .csv" />
+        <button id="uploadBtn">Upload</button>
+        <p id="uploadMessage"></p>
+      </section>
+    </main>
+    <footer>
+      &copy; 2025 My Weight Journey
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const startWeightDisplay = document.getElementById("startWeightDisplay");
+      const currentWeightInput = document.getElementById("currentWeightInput");
+      const goalWeightDisplay = document.getElementById("goalWeightDisplay");
+      const progressBarFill = document.getElementById("progressBarFill");
+      const updateWeightBtn = document.getElementById("updateWeightBtn");
+      const editGoalBtn = document.getElementById("editGoalBtn");
+      const editGoalForm = document.getElementById("editGoalForm");
+      const saveGoalBtn = document.getElementById("saveGoalBtn");
+      const newGoalWeightInput = document.getElementById("newGoalWeight");
+
+      const recordDateInput = document.getElementById("recordDate");
+      const recordWeightInput = document.getElementById("recordWeight");
+      const addRecordBtn = document.getElementById("addRecordBtn");
+      const weightRecordList = document.getElementById("weightRecordList");
+
+      const uploadFile = document.getElementById("uploadFile");
+      const uploadBtn = document.getElementById("uploadBtn");
+      const uploadMessage = document.getElementById("uploadMessage");
+
+      let startWeight = parseFloat(localStorage.getItem("startWeight")) || 0;
+      let currentWeight = parseFloat(localStorage.getItem("currentWeight")) || startWeight;
+      let goalWeight = parseFloat(localStorage.getItem("goalWeight")) || 0;
+      let weightRecords = JSON.parse(localStorage.getItem("weightRecords")) || [];
+
+      if (startWeight === 0) {
+        const input = prompt("Enter your starting weight:");
+        if (input && !isNaN(parseFloat(input))) {
+          startWeight = parseFloat(input);
+          localStorage.setItem("startWeight", startWeight);
+        }
+      }
+
+      function updateDisplay() {
+        startWeightDisplay.textContent = startWeight;
+        goalWeightDisplay.textContent = goalWeight;
+
+        const progress = (startWeight - currentWeight) / (startWeight - goalWeight) * 100;
+        const clamped = Math.max(0, Math.min(100, progress));
+        progressBarFill.style.width = clamped + "%";
+        progressBarFill.textContent = Math.round(clamped) + "%";
+      }
+
+      updateDisplay();
+      renderRecords();
+
+      updateWeightBtn.addEventListener("click", () => {
+        const val = parseFloat(currentWeightInput.value);
+        if (!isNaN(val)) {
+          currentWeight = val;
+          localStorage.setItem("currentWeight", currentWeight);
+          updateDisplay();
+          currentWeightInput.value = "";
+        }
+      });
+
+      editGoalBtn.addEventListener("click", () => {
+        editGoalForm.style.display = "block";
+        editGoalBtn.style.display = "none";
+      });
+
+      saveGoalBtn.addEventListener("click", () => {
+        const val = parseFloat(newGoalWeightInput.value);
+        if (!isNaN(val)) {
+          goalWeight = val;
+          localStorage.setItem("goalWeight", goalWeight);
+          updateDisplay();
+          newGoalWeightInput.value = "";
+          editGoalForm.style.display = "none";
+          editGoalBtn.style.display = "inline-block";
+        }
+      });
+
+      addRecordBtn.addEventListener("click", () => {
+        const date = recordDateInput.value;
+        const weight = parseFloat(recordWeightInput.value);
+        if (date && !isNaN(weight)) {
+          weightRecords.push({ date, weight });
+          weightRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
+          localStorage.setItem("weightRecords", JSON.stringify(weightRecords));
+          renderRecords();
+          recordDateInput.value = "";
+          recordWeightInput.value = "";
+        }
+      });
+
+      function renderRecords() {
+        weightRecordList.innerHTML = "";
+        weightRecords.forEach((record, index) => {
+          const li = document.createElement("li");
+          li.textContent = `${record.date}: ${record.weight} lbs`;
+          const del = document.createElement("button");
+          del.textContent = "Delete";
+          del.addEventListener("click", () => {
+            weightRecords.splice(index, 1);
+            localStorage.setItem("weightRecords", JSON.stringify(weightRecords));
+            renderRecords();
+          });
+          li.appendChild(del);
+          weightRecordList.appendChild(li);
+        });
+      }
+
+      uploadBtn.addEventListener("click", () => {
+        const file = uploadFile.files[0];
+        if (!file) {
+          uploadMessage.textContent = "Please select a file to upload.";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const text = e.target.result;
+            let data = [];
+
+            if (file.type === "application/json") {
+              data = JSON.parse(text);
+            } else if (file.name.endsWith(".csv")) {
+              const lines = text.split("\n").filter(line => line.trim());
+              const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+              const dateIdx = headers.indexOf("date");
+              const weightIdx = headers.indexOf("weight");
+              for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(",");
+                const date = cols[dateIdx]?.trim();
+                const weight = parseFloat(cols[weightIdx]);
+                if (date && !isNaN(weight)) {
+                  data.push({ date, weight });
+                }
+              }
+            }
+
+            weightRecords = [...weightRecords, ...data];
+            weightRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem("weightRecords", JSON.stringify(weightRecords));
+            renderRecords();
+            uploadMessage.textContent = "Upload successful!";
+          } catch (err) {
+            uploadMessage.textContent = "Failed to read file.";
+            console.error(err);
+          }
+        };
+        reader.readAsText(file);
+      });
+    });
+  </script>
+</body>
+</html>
